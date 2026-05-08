@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 
 const BUSINESS_TYPES = [
   'Restaurant', 'Salon', 'Dental Clinic', 'Hotel', 'Plumber',
-  'Real Estate Agent', 'Gym', 'Spa', 'Law Firm', 'Accounting Firm'
+  'Real Estate Agent', 'Gym', 'Spa', 'Law Firm', 'Accounting Firm',
+  'Other / Custom'
 ];
 
 const TONES = [
@@ -18,6 +19,7 @@ const TONES = [
 export default function ToolPage() {
   const [reviewText, setReviewText] = useState('');
   const [businessType, setBusinessType] = useState(BUSINESS_TYPES[0]);
+  const [customBusinessType, setCustomBusinessType] = useState('');
   const [tone, setTone] = useState(TONES[0]);
   const [generatedReply, setGeneratedReply] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -98,10 +100,12 @@ export default function ToolPage() {
     setGeneratedReply('');
 
     try {
+      const actualBusinessType = businessType === 'Other / Custom' ? customBusinessType : businessType;
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reviewText, businessType, tone }),
+        body: JSON.stringify({ reviewText, businessType: actualBusinessType, tone }),
       });
 
       if (!response.ok) {
@@ -234,28 +238,42 @@ export default function ToolPage() {
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder="Paste your customer's Google review here..."
-                className="flex-grow w-full border border-gray-300 rounded-lg p-4 min-h-[200px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="flex-grow w-full border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg p-4 min-h-[200px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               />
 
               <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
-                  <select
-                    value={businessType}
-                    onChange={(e) => setBusinessType(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                  >
-                    {BUSINESS_TYPES.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+                    <select
+                      value={businessType}
+                      onChange={(e) => setBusinessType(e.target.value)}
+                      className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                    >
+                      {BUSINESS_TYPES.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {businessType === 'Other / Custom' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Custom Business Name</label>
+                      <input
+                        type="text"
+                        value={customBusinessType}
+                        onChange={(e) => setCustomBusinessType(e.target.value)}
+                        placeholder="e.g. Bhaava Ayurveda Clinic"
+                        className="w-full border border-gray-300 text-gray-900 placeholder-gray-400 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Reply Tone</label>
                   <select
                     value={tone}
                     onChange={(e) => setTone(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                    className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                   >
                     {TONES.map(t => (
                       <option key={t} value={t}>{t}</option>
