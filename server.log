@@ -1,0 +1,27 @@
+
+> myapp@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 1827ms
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 1820ms (127 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 6.4s (571 modules)
+ ✓ Compiled in 894ms (264 modules)
+ GET / 200 in 7429ms
+ ○ Compiling /pricing ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (101kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (231kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled /pricing in 4.4s (565 modules)
+ GET /pricing 200 in 4604ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1087ms (686 modules)
+ ✓ Compiled /tool in 355ms (706 modules)
+ GET /tool 200 in 538ms
+ ✓ Compiled in 448ms (347 modules)
+ ✓ Compiled in 309ms (347 modules)
+ ✓ Compiled in 759ms (352 modules)
