@@ -27,11 +27,28 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message);
+      if (error.message.toLowerCase().includes('rate limit')) {
+        setError('Email rate limit exceeded. Please continue with Google or GitHub instead.');
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push('/tool');
       router.refresh();
+    }
+  };
+
+  const handleOAuth = async (provider: 'google' | 'github') => {
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
     }
   };
 
@@ -59,7 +76,7 @@ export default function SignupPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -77,7 +94,7 @@ export default function SignupPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
             </div>
@@ -96,6 +113,34 @@ export default function SignupPage() {
               </button>
             </div>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleOAuth('google')}
+                className="w-full flex justify-center items-center py-2 px-4 border border-blue-600 rounded-md shadow-sm bg-white text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                Google
+              </button>
+              <button
+                onClick={() => handleOAuth('github')}
+                className="w-full flex justify-center items-center py-2 px-4 border border-blue-600 rounded-md shadow-sm bg-white text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                GitHub
+              </button>
+            </div>
+          </div>
 
           <div className="mt-6">
             <div className="relative">

@@ -12,7 +12,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'dummy_key', {
 // or just use generic amounts.
 const PRICES = {
   pro: { amount: 1900, name: 'Pro Plan' },
-  agency: { amount: 4900, name: 'Agency Plan' }
+  agency: { amount: 4900, name: 'Agency Plan' },
+  lifetime: { amount: 9900, name: 'Lifetime Deal' }
 };
 
 export async function POST(req: Request) {
@@ -26,11 +27,25 @@ export async function POST(req: Request) {
 
     const { plan } = await req.json();
 
-    if (plan !== 'pro' && plan !== 'agency') {
+    if (plan !== 'pro' && plan !== 'agency' && plan !== 'lifetime') {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+    const mode = plan === 'lifetime' ? 'payment' : 'subscription';
+
+    const priceData: any = {
+      currency: 'usd',
+      product_data: {
+        name: PRICES[plan as keyof typeof PRICES].name,
+      },
+      unit_amount: PRICES[plan as keyof typeof PRICES].amount,
+    };
+
+    if (mode === 'subscription') {
+      priceData.recurring = { interval: 'month' };
+    }
 
     // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -39,20 +54,11 @@ export async function POST(req: Request) {
       customer_email: user.email,
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: PRICES[plan as keyof typeof PRICES].name,
-            },
-            unit_amount: PRICES[plan as keyof typeof PRICES].amount,
-            recurring: {
-              interval: 'month',
-            },
-          },
+          price_data: priceData,
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: mode,
       success_url: `${appUrl}/tool?success=true`,
       cancel_url: `${appUrl}/pricing?canceled=true`,
       client_reference_id: user.id, // Pass user id to link in webhook

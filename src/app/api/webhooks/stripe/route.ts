@@ -32,16 +32,12 @@ export async function POST(req: Request) {
   const session = event.data.object as Stripe.Checkout.Session;
 
   if (event.type === 'checkout.session.completed') {
-    // Retrieve the subscription details from Stripe
-    const subscription = await stripe.subscriptions.retrieve(
-      session.subscription as string
-    );
-
     const userId = session.metadata?.userId;
     const plan = session.metadata?.plan;
 
     if (userId && plan) {
       // Update user plan in Supabase
+      // Works for both one-time payments (LTD) and subscriptions
       const { error } = await supabaseAdmin
         .from('users')
         .update({

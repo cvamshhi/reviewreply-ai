@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { MessageCircle, Zap, Star, CheckCircle } from 'lucide-react';
+import { createClient } from '@/utils/supabase/server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -18,12 +22,27 @@ export default function Home() {
               <Link href="/pricing" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
                 Pricing
               </Link>
-              <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
-                Sign in
-              </Link>
-              <Link href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/tool" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                    Tool
+                  </Link>
+                  <form action="/auth/signout" method="post">
+                    <button type="submit" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                      Logout
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                    Sign in
+                  </Link>
+                  <Link href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

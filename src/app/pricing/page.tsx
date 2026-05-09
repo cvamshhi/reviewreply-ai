@@ -1,13 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const handleSubscribe = async (plan: 'pro' | 'agency') => {
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+  }, [supabase]);
+
+  const handleSubscribe = async (plan: 'pro' | 'agency' | 'lifetime') => {
+    if (!user) {
+      router.push('/login?next=/pricing');
+      return;
+    }
+
     setLoading(plan);
     try {
       const response = await fetch('/api/checkout', {
@@ -49,13 +65,29 @@ export default function PricingPage() {
               <Link href="/tool" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
                 Tool
               </Link>
-              <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
-                Sign in
-              </Link>
+              {user ? (
+                <button onClick={() => supabase.auth.signOut().then(() => setUser(null))} className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                  Logout
+                </button>
+              ) : (
+                <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </nav>
+
+      {/* Lifetime Deal Banner */}
+      <div className="bg-blue-600 text-white text-center py-3 px-4 shadow-sm relative z-10">
+        <p className="font-medium">
+          <span className="font-bold">Founder's Special:</span> Get Lifetime Access for $99 (Limited to first 50 users).{' '}
+          <button onClick={() => handleSubscribe('lifetime')} className="underline hover:text-blue-100 font-semibold ml-2">
+            Claim deal &rarr;
+          </button>
+        </p>
+      </div>
 
       <div className="flex-grow py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
